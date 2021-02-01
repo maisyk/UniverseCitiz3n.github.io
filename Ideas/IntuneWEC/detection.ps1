@@ -11,9 +11,9 @@
 
 # Define Variables
 $EventLog = $null
-$LogName = 'Application'
+$LogName = 'Security'
 $GeneratedAfter = ((Get-Date).AddHours(-1))
-$InstanceId = '3221233670'
+$InstanceId = '4672'
 
 try {
 	$EventLog = Get-EventLog -LogName $LogName -After $GeneratedAfter -InstanceId $InstanceId | ForEach-Object {
@@ -34,12 +34,17 @@ try {
 		Write-Host "Found: $($($EventLog | Measure-Object).count) events"
 		$Timestamp = (Get-Date)
 		$FileTimeStamp = $Timestamp.ToString('yyyyMMddhhmm')
-		$null = $EventLog | Export-Csv -Path "$PSScriptRoot\$($FileTimeStamp)_eventlogs.csv" -NoTypeInformation
-		if ((Get-ChildItem $PSScriptRoot *_eventlogs.csv | Measure-Object).Count -eq 1) {
+		$null = $EventLog | Export-Csv -Path "$env:TEMP\$($FileTimeStamp)_eventlogs.csv" -NoTypeInformation
+		if ((Get-ChildItem $env:TEMP *_eventlogs.csv | Measure-Object).Count -eq 1) {
+			if (Test-Path $env:TEMP\eventlogs.sent) {
+				Remove-Item -Path $PSScriptRoot\remediate.ps1 -Force
+				exit 0
+			} else {
+				exit 1
+			}
+		} elseif (((Get-ChildItem $env:TEMP *_eventlogs.csv | Sort-Object LastWriteTime -Descending)[1].name -split '_')[0] -lt $($Timestamp.AddMinutes(-30)).ToString('yyyyMMddhhmm')) {
 			exit 1
-		} elseif (((Get-ChildItem $PSScriptRoot *_eventlogs.csv | Sort-Object LastWriteTime -Descending)[1].name -split '_')[0] -lt $($Timestamp.AddMinutes(-30)).ToString('yyyyMMddhhmm')) {
-			exit 1
-		} elseif (Test-Path $PSScriptRoot\eventlogs.sent) {
+		} elseif (Test-Path $env:TEMP\eventlogs.sent) {
 			Remove-Item -Path $PSScriptRoot\remediate.ps1 -Force
 			exit 0
 		}
@@ -50,6 +55,6 @@ try {
 	}
 } catch {
 	$errMsg = $_
-	Write-Error $errMsg
+	Write-Error "$errMsg;$(whoami)"
 	#exit 1
 }

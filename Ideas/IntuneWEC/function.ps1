@@ -2,7 +2,8 @@ try {
     Import-Module ALTools -Force
 
     $invocationStartTime = [DateTime]::UtcNow
-    $object = Import-Csv -Path $(Get-ChildItem -Path $PSScriptRoot -Filter *_eventlogs.csv | Sort-Object LastWriteTime -Descending)[0]
+    Set-Location $env:TEMP
+    $object = Import-Csv -Path $(Get-ChildItem -Path $env:TEMP -Filter *_eventlogs.csv | Sort-Object LastWriteTime -Descending)[0]
     $invocationEndTime = [DateTime]::UtcNow
 
     $writeToLogAnalyticsSplat = @{
@@ -13,12 +14,10 @@ try {
         invocationEndTime   = $invocationEndTime
         WorkspacePrimaryKey = '88j0ruCRi5iE5gDTHRoaXL9+Nap4QByxj4qdBx6k3S2vR5lyQ2m4xgeKzSVK74t/yMvx/qjQGGf9fwAtTY1xlw=='
     }
-    Write-ToLogAnalytics @writeToLogAnalyticsSplat -Verbose
-    New-Item -Path $PSScriptRoot -Name 'eventlogs.sent' -ItemType File -Force
-
+    Write-ToLogAnalytics @writeToLogAnalyticsSplat
+    $null = New-Item -Path $env:TEMP -Name 'eventlogs.sent' -ItemType File -Force
 } catch {
     $errMsg = $_
-    $line = $_.Exception.InvocationInfo.ScriptLineNumber
-    Write-Error "$errMsg;$line"
+    Write-Error "$errMsg"
     exit 1
 }
