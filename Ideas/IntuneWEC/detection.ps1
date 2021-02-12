@@ -37,7 +37,6 @@ try {
 		$null = $EventLog | Export-Csv -Path "$env:TEMP\$($FileTimeStamp)_eventlogs.csv" -NoTypeInformation
 		if ((Get-ChildItem $env:TEMP *_eventlogs.csv | Measure-Object).Count -eq 1) {
 			if (Test-Path $env:TEMP\eventlogs.sent) {
-				Remove-Item -Path $PSScriptRoot\remediate.ps1 -Force
 				exit 0
 			} else {
 				exit 1
@@ -45,7 +44,6 @@ try {
 		} elseif (((Get-ChildItem $env:TEMP *_eventlogs.csv | Sort-Object LastWriteTime -Descending)[1].name -split '_')[0] -lt $($Timestamp.AddMinutes(-30)).ToString('yyyyMMddhhmm')) {
 			exit 1
 		} elseif (Test-Path $env:TEMP\eventlogs.sent) {
-			Remove-Item -Path $PSScriptRoot\remediate.ps1 -Force
 			exit 0
 		}
 	} else {

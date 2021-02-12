@@ -12,7 +12,7 @@ try {
         PSObject            = $object
         ALTableIdentifier   = 'IntuneTEST' #Your name for Azure Logs
         invocationEndTime   = $invocationEndTime
-        WorkspacePrimaryKey = '88j0ruCRi5iE5gDTHRoaXL9+Nap4QByxj4qdBx6k3S2vR5lyQ2m4xgeKzSVK74t/yMvx/qjQGGf9fwAtTY1xlw=='
+        WorkspacePrimaryKey = 'XXXXXXXXXXXXXXXXXXX'
     }
     Write-ToLogAnalytics @writeToLogAnalyticsSplat
     $null = New-Item -Path $env:TEMP -Name 'eventlogs.sent' -ItemType File -Force
